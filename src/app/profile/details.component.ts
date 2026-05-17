@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 
 import { AccountService } from '../_services';
 
-@Component({ templateUrl: 'home.component.html', standalone: false })
-export class HomeComponent {
+@Component({ templateUrl: 'details.component.html', standalone: false })
+export class DetailsComponent {
     constructor(private accountService: AccountService) { }
 
     get account() {

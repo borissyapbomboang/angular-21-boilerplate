@@ -23,6 +23,8 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         );
 
         function handleRoute(): Observable<HttpEvent<any>> {
+                accounts = JSON.parse(localStorage.getItem(accountsKey) ?? '[]') || [];
+
             switch (true) {
                 case url.endsWith('/accounts/authenticate') && method === 'POST':
                     return authenticate();

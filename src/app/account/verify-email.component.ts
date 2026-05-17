@@ -38,4 +38,4 @@ export class VerifyEmailComponent implements OnInit {
                 }
             });
     }
-}s
+}

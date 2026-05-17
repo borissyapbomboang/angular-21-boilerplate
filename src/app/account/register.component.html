@@ -69,7 +69,8 @@
             <div *ngIf="submitted && f.acceptTerms.errors" class="invalid-feedback">Accept Ts & Cs is required</div>
         </div>
         <div class="mb-3">
-            <button [disabled]="submitting" class="btn btn-primary">
+            <button [attr.disabled]="submitting ? true : null"
+ class="btn btn-primary">
                 <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>
                 Register
             </button>
