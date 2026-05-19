@@ -94,38 +94,38 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         }
 
         function register() {
-            const params = body;
-            if (accounts.find((x: any) => x.email === params.email)) {
-                alertService.info(`
-                    <h4>Email Already Registered</h4>
-                    <p>Your email <strong>${params.email}</strong> is already registered.</p>
-                    <p>Please <a href="${location.origin}/account/forgot-password">click here</a> to reset your password.</p>
-                    <p>The fake backend displayed this "email" so you can test without an email server. A real backend would send a real email.</p>
-                `, { autoClose: false });
-                return ok();
-            }
+    const params = body;
+    if (accounts.find((x: any) => x.email === params.email)) {
+        alertService.info(`
+            <h4>Email Already Registered</h4>
+            <p>Your email <strong>${params.email}</strong> is already registered.</p>
+            <p>Please <a href="${location.origin}/account/forgot-password">click here</a> to reset your password.</p>
+            <p>The fake backend displayed this "email" so you can test without an email server. A real backend would send a real email.</p>
+        `, { autoClose: false, keepAfterRouteChange: true }); // ✅ added
+        return ok();
+    }
 
-            const account: any = { ...params };
-            account.id = newAccountId();
-            account.dateCreated = new Date().toISOString();
-            account.role = accounts.length === 0 ? Role.Admin : Role.User;
-            account.verificationToken = new Date().getTime().toString();
-            account.isVerified = false;
-            account.refreshTokens = [];
-            delete account.confirmPassword;
-            accounts.push(account);
-            localStorage.setItem(accountsKey, JSON.stringify(accounts));
+    const account: any = { ...params };
+    account.id = newAccountId();
+    account.dateCreated = new Date().toISOString();
+    account.role = accounts.length === 0 ? Role.Admin : Role.User;
+    account.verificationToken = new Date().getTime().toString();
+    account.isVerified = false;
+    account.refreshTokens = [];
+    delete account.confirmPassword;
+    accounts.push(account);
+    localStorage.setItem(accountsKey, JSON.stringify(accounts));
 
-            const verifyUrl = `${location.origin}/account/verify-email?token=${account.verificationToken}`;
-            alertService.info(`
-                <h4>Registration Successful</h4>
-                <p>Thanks for registering!</p>
-                <p>Please click the below link to verify your email address:</p>
-                <p><a href="${verifyUrl}">${verifyUrl}</a></p>
-                <p>The fake backend displayed this "email" so you can test without an email server. A real backend would send a real email.</p>
-            `, { autoClose: false });
-            return ok();
-        }
+    const verifyUrl = `${location.origin}/account/verify-email?token=${account.verificationToken}`;
+    alertService.info(`
+        <h4>Registration Successful</h4>
+        <p>Thanks for registering!</p>
+        <p>Please click the below link to verify your email address:</p>
+        <p><a href="${verifyUrl}">${verifyUrl}</a></p>
+        <p>The fake backend displayed this "email" so you can test without an email server. A real backend would send a real email.</p>
+    `, { autoClose: false, keepAfterRouteChange: true }); // ✅ added
+    return ok();
+}
 
         function verifyEmail() {
             const { token } = body;
@@ -150,7 +150,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
                 <p>Please click the below link to reset your password:</p>
                 <p><a href="${resetUrl}">${resetUrl}</a></p>
                 <p>The fake backend displayed this "email" so you can test without an email server. A real backend would send a real email.</p>
-            `, { autoClose: false });
+            `, { autoClose: false, keepAfterRouteChange: true }); // ✅ added
             return ok();
         }
 
@@ -236,19 +236,16 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         }
 
         function ok(body?: any) {
-            return of(new HttpResponse({ status: 200, body }))
-                .pipe(delay(500));
-        }
+    return of(new HttpResponse({ status: 200, body }));
+}
 
         function error(message: string) {
-            return throwError(() => ({ error: { message } }))
-                .pipe(materialize(), delay(500), dematerialize());
-        }
+    return throwError(() => ({ error: { message } }));
+}
 
         function unauthorized() {
-            return throwError(() => ({ status: 401, error: { message: 'Unauthorized' } }))
-                .pipe(materialize(), delay(500), dematerialize());
-        }
+    return throwError(() => ({ status: 401, error: { message: 'Unauthorized' } }));
+}
 
         function basicDetails(account: any) {
             const { id, title, firstName, lastName, email, role, dateCreated, isVerified } = account;
@@ -292,11 +289,12 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             return `fake-jwt-token.${btoa(JSON.stringify(tokenPayload))}`;
         }
 
-        function generateRefreshToken() {
-            const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString();
-            document.cookie = `fakeRefreshToken=; expires=${expires}; path=/`;
-            return 'fake-refresh-token';
-        }
+       function generateRefreshToken() {
+    const token = 'fake-refresh-token';
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString();
+    document.cookie = `fakeRefreshToken=${token}; expires=${expires}; path=/`;
+    return token;
+}
 
         function getRefreshToken() {
             return (document.cookie.split(';').find(x => x.includes('fakeRefreshToken')) || '=').split('=')[1];

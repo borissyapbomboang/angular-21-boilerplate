@@ -49,11 +49,17 @@ export class AlertComponent implements OnInit, OnDestroy {
             });
 
         this.routeSubscription = this.router.events.subscribe(event => {
-            if (event instanceof NavigationStart) {
-                this.alertService.clear(this.id);
-                this.scheduleDetectChanges();
-            }
-        });
+    if (event instanceof NavigationStart) {
+        // ✅ Only clear if navigating to a DIFFERENT url
+        const currentUrl = this.router.url.split('?')[0];
+        const nextUrl = event.url.split('?')[0];
+        
+        if (currentUrl !== nextUrl) {
+            this.alertService.clear(this.id);
+            this.scheduleDetectChanges();
+        }
+    }
+});
     }
 
     ngOnDestroy() {

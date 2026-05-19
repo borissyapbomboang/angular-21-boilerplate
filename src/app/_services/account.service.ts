@@ -36,11 +36,15 @@ export class AccountService {
     }
 
     logout() {
-        this.http.post<any>(`${baseUrl}/revoke-token`, {}, { withCredentials: true }).subscribe();
-        this.stopRefreshTokenTimer();
-        this.accountSubject.next(null);
-        this.router.navigate(['/account/login']);
-    }
+    this.http.post<any>(`${baseUrl}/revoke-token`, {}, { withCredentials: true })
+        .subscribe({
+            next: () => {},
+            error: () => {} // ✅ ignore error
+        });
+    this.stopRefreshTokenTimer();
+    this.accountSubject.next(null); // ✅ clears account
+    this.router.navigate(['/account/login']);
+}
 
     refreshToken() {
         return this.http.post<Account>(`${baseUrl}/refresh-token`, {}, { withCredentials: true })
@@ -106,12 +110,22 @@ export class AccountService {
     private refreshTokenTimeout?: any;
 
     private startRefreshTokenTimer() {
+    try {
         const jwtToken = JSON.parse(atob(this.accountValue!.jwtToken!.split('.')[1]));
         const expires = new Date(jwtToken.exp * 1000);
         const timeout = expires.getTime() - Date.now() - (60 * 1000);
-        this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(), timeout);
+        
+        if (timeout > 0) {
+            this.refreshTokenTimeout = setTimeout(() => 
+                this.refreshToken().subscribe({
+                    error: () => this.stopRefreshTokenTimer() // ✅ stop timer silently, don't logout
+                })
+            , timeout);
+        }
+    } catch(e) {
+        // ignore
     }
-
+}
     private stopRefreshTokenTimer() {
         clearTimeout(this.refreshTokenTimeout);
     }

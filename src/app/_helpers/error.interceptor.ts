@@ -10,13 +10,21 @@ export class ErrorInterceptor implements HttpInterceptor {
 
     intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         return next.handle(request).pipe(
-            catchError((err: { status: number; error: { message: any; }; statusText: any; }) => {
+            catchError((err: any) => {
                 if ([401, 403].includes(err.status) && this.accountService.accountValue) {
-                    this.accountService.logout();
+                    const isAuthEndpoint = request.url.includes('/accounts/validate-reset-token')
+                        || request.url.includes('/accounts/reset-password')
+                        || request.url.includes('/accounts/refresh-token');
+
+                    if (!isAuthEndpoint) {
+                        this.accountService.logout();
+                    }
                 }
 
-                const error = (err && err.error && err.error.message) || err.statusText;
-                console.error(err);
+                // ✅ Always extract to a plain string
+                const error = err?.error?.message || err?.message || err?.statusText || 'An error occurred';
+                console.log('FULL ERR:', JSON.stringify(err));
+                console.log('EXTRACTED:', error);
                 return throwError(() => error);
             })
         );
