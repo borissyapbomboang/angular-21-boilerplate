@@ -3,7 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
-import { fakeBackendProvider } from './_helpers';
 
 import { AppRoutingModule } from './app-routing.module';
 import { JwtInterceptor, ErrorInterceptor, appInitializer } from './_helpers';
@@ -28,7 +27,6 @@ import { HomeComponent } from './home';
     { provide: APP_INITIALIZER, useFactory: appInitializer, multi: true, deps: [AccountService] },
     
     // ✅ fakeBackendProvider MUST be first before other interceptors
-    fakeBackendProvider,
     
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
