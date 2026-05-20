@@ -8,4 +8,5 @@ export class Account {
     email?: string;
     role?: Role;
     jwtToken?: string;
+    dateCreated?: string; // ✅ add this
 }
