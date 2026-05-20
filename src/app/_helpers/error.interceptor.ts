@@ -13,8 +13,12 @@ export class ErrorInterceptor implements HttpInterceptor {
             catchError((err: any) => {
                 if ([401, 403].includes(err.status) && this.accountService.accountValue) {
                     const isAuthEndpoint = request.url.includes('/accounts/validate-reset-token')
-                        || request.url.includes('/accounts/reset-password')
-                        || request.url.includes('/accounts/refresh-token');
+    || request.url.includes('/accounts/reset-password')
+    || request.url.includes('/accounts/refresh-token')
+    || request.url.includes('/accounts/register')        // ✅ add
+    || request.url.includes('/accounts/authenticate')    // ✅ add
+    || request.url.includes('/accounts/verify-email')    // ✅ add
+    || request.url.includes('/accounts/forgot-password'); // ✅ add
 
                     if (!isAuthEndpoint) {
                         this.accountService.logout();
@@ -23,8 +27,7 @@ export class ErrorInterceptor implements HttpInterceptor {
 
                 // ✅ Always extract to a plain string
                 const error = err?.error?.message || err?.message || err?.statusText || 'An error occurred';
-                console.log('FULL ERR:', JSON.stringify(err));
-                console.log('EXTRACTED:', error);
+                
                 return throwError(() => error);
             })
         );
